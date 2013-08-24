@@ -34,7 +34,7 @@
       this.set("accy", 0);
       this.set("dx", 0);
       this.set("dy", 0);
-      this.set("slide", 0.5);
+      this.set("flyRatio", 0.5);
       this.on("change:x change:y", this.syncPosition, this);
     },
     blockPlayer: function () {
@@ -51,9 +51,11 @@
       return this.get("floor") && !this.get("ladder");
     },
     update: function (time, delta, game) {
+      var flyRatio = this.get("flyRatio");
       var speedx = this.get("speedx");
       var speedy = this.get("speedy");
       var onFloor = this.get("floor");
+      var slide = this.get("slide");
       var onLadder = game.playerIsOnLadder(this);
       
       var gravity = onLadder ? 0 : game.get("gravity");
@@ -63,10 +65,20 @@
       var dx = 0, dy = 0;
 
       dx += accx;
-      dx += this.get("dx")*speedx*delta;
+      if (onFloor||onLadder) {
+        dx += this.get("dx")*speedx*delta;
+      }
+      else {
+        dx += this.get("dx")*speedx*delta*flyRatio;
+      }
 
       dy += accy;
-      dy += this.get("dy")*speedy*delta;
+      if (onLadder) {
+        dy += this.get("dy")*speedy*delta;
+      }
+      else if (!onFloor) {
+        dy += Math.max(0, this.get("dy")*speedy*delta*flyRatio);
+      }
 
       var constraints = game.movePlayer(this, dx, dy);
       onFloor = constraints.ycollide && constraints.yinside > 0;
@@ -77,7 +89,7 @@
         this.set("accx", 0);
       }
       else if (constraints.ycollide) {
-        this.set("accx", this.get("slide")*accx);
+        this.set("accx", slide*accx);
       }
       else {
         this.set("accx", accx);
@@ -131,7 +143,7 @@
     update: function (time, delta, game) {
       var remainPercent = this.get("level").get("remainPercent") || 1;
       var closing1 = g.smoothstep(1.0, 0.0, remainPercent);
-      var closing2 = Math.pow(g.smoothstep(1.0, 0.0, remainPercent), 5);
+      var closing2 = Math.pow(g.smoothstep(1.0, 0.0, remainPercent), 4);
       var door = this.door;
       var doorEnvSize = 2;
       door.clear();
@@ -158,12 +170,45 @@
     }
   });
 
+  g.BrokenPlatform = g.Entity.extend({
+    getSprite: function () {
+      var sprite = PIXI.Sprite.fromImage("images/broken-platform.png");
+      sprite.position.x = SW*this.get("x");
+      sprite.position.y = SH*this.get("y");
+      return sprite;
+    }
+  });
+  
   g.Platform = g.Entity.extend({
     getSprite: function () {
       var sprite = PIXI.Sprite.fromImage("images/platform.png");
       sprite.position.x = SW*this.get("x");
       sprite.position.y = SH*this.get("y");
       return sprite;
+    }
+  });
+  
+  g.SwitchButton = g.Entity.extend({
+    initialize: function () {
+      var container = new PIXI.DisplayObjectContainer();
+      container.position.x = SW*this.get("x");
+      container.position.y = SH*this.get("y");
+      this.s_on = PIXI.Sprite.fromImage("images/switch-on.png");
+      this.s_off = PIXI.Sprite.fromImage("images/switch-off.png");
+      container.addChild(this.s_off);
+      this.sprite = container;
+    },
+    getSprite: function () {
+      return this.sprite;
+    },
+    blockPlayer: function () {
+      return false;
+    },
+    activate: function () {
+      var v = !this.get("switch");
+      this.set("switch", v);
+      this.sprite.removeChild(!v ? this.s_on : this.s_off);
+      this.sprite.addChild(v ? this.s_on : this.s_off);
     }
   });
   
@@ -208,6 +253,10 @@
       var sprite = PIXI.Sprite.fromImage("images/ladder.png");
       sprite.position.x = SW*this.get("x");
       sprite.position.y = SH*this.get("y");
+      if (this.get("reverse")) {
+        sprite.pivot.x = SW;
+        sprite.scale.x = -1;
+      }
       return sprite;
     },
     blockPlayer: function () {
@@ -302,7 +351,9 @@
           maxX = Math.max(maxX, x);
           switch (t) {
             case "p": return new g.Platform({ x: x, y: y });
+            case "P": return new g.BrokenPlatform({ x: x, y: y });
             case "l": return new g.Ladder({ x: x, y: y });
+            case "t": return new g.Ladder({ x: x, y: y, reverse: true });
             case "a": return new g.WallWithAlarm({ x: x, y: y, level: this });
             case "b": return new g.WallButton({ x: x, y: y });
             case "w": return new g.Wall({ x: x, y: y });
@@ -313,7 +364,8 @@
               var to = _.indexOf(line, "<");
               return new g.MovingPlatform({ x: x, y: y, horizontal: true, from: from, to: to, speed: 0.002 });
             case "x": return new g.ExitDoor({ x: x, y: y, level: this });
-            case ":": return new g.ExitLadder({ x: x, y: y });
+            case "=": return new g.ExitLadder({ x: x, y: y });
+            case "G": return new g.SwitchButton({ x: x, y: y, typ: "gravity" });
             case "o": 
               this.set("playerPosition", { x: x, y: y });
               return undefined;
@@ -363,6 +415,10 @@
     }
   });
 
+  g.Levels = Backbone.Collection.extend({
+    model: g.Level
+  });
+
   g.Game = Backbone.Model.extend({
     initialize: function () {
       this.updates = new Backbone.Collection();
@@ -392,6 +448,7 @@
       if (this.playerIsOutside(player)) {
         this.trigger("player-exit");
       }
+      this.trigger("update", time, delta, game);
     },
     playerIsOnLadder: function (player) {
       var x = player.get("x");
@@ -430,6 +487,8 @@
       var ycollide = false;
       var x = ox;
       var y = oy;
+
+      var canGoOut = level.get("activated");
 
       function findBlock (x, y) {
         var e = level.getEntityByPosition(x, y);
@@ -473,6 +532,12 @@
           x = dx > 0 ? bx-w : bx+1;
         }
       }
+
+      if (!canGoOut) {
+        x = Math.max(0, Math.min(x, level.get("width")));
+        y = Math.max(0, Math.min(y, level.get("width")));
+      }
+
       player.set({ x: x, y: y });
       return {
         xcollide: xcollide,

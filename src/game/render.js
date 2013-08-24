@@ -40,7 +40,7 @@
     },
     render: function () {
       var remainPercent = this.model.get("remainPercent") || 1;
-      this.redOverlay.alpha = 0.3*g.smoothstep(1, 0, remainPercent);
+      this.redOverlay.alpha = 0.7*Math.pow(g.smoothstep(1, 0, remainPercent), 3);
     },
     setY: function (y) {
       this.display.position.y = y;
