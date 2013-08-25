@@ -5,7 +5,7 @@
     <title>LD27</title>
     <link rel="stylesheet" href="style/main.css" />
     <link rel="shortcut icon" href="images/favicon.ico" />
-<link href='http://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
 
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,8 +13,139 @@
   <body>
     <div id="wrapper">
       <h1>Mission Mars</h1>
-      <div id="game"></div>
+      <div id="loading">
+        <progress>Loading...</progress>
+      </div>
+      <div id="viewport">
+      <div id="dialogs" style="display:none">
+        <div id="cockpit">
+          <section>
+            <figure>
+              <img src="images/conv/mike.png" alt="" />
+              <figcaption class="author">Mike</figcaption>
+            </figure>
+            <ul class="message">
+              <li class="auto">John,...</li>
+              <li>John!</li>
+              <li>Wake up!</li>
+            </ul>
+          </section>
+          <section class="show-cockpit">
+            <figure>
+              <img src="images/conv/me.png" alt="" />
+              <figcaption class="author">John (me)</figcaption>
+            </figure>
+            <ul class="message">
+              <li>Yup!</li>
+            </ul>
+          </section>
+          <section>
+            <figure>
+              <img src="images/conv/mike.png" alt="" />
+              <figcaption class="author">Mike</figcaption>
+            </figure>
+            <ul class="message">
+              <li>Congrats, we have lift off!</li>
+            </ul>
+          </section>
+          <section>
+            <figure>
+              <img src="images/conv/houston.png" alt="" />
+              <figcaption class="author">Houston</figcaption>
+            </figure>
+            <ul class="message">
+              <li class="auto">...</li>
+              <li>This is Houston.</li>
+              <li>Lift off successful. Everything is alright?</li>
+            </ul>
+          </section>
+          <section>
+            <figure>
+              <img src="images/conv/greg.png" alt="" />
+              <figcaption class="author">Greg</figcaption>
+            </figure>
+            <ul class="message">
+              <li>Ludum to Houston.</li>
+              <li>We all fine.</li>
+              <li>John just woke up.</li>
+            </ul>
+          </section>
+          <section>
+            <figure>
+              <img src="images/conv/houston.png" alt="" />
+              <figcaption class="author">Houston</figcaption>
+            </figure>
+            <ul class="message">
+              <li>Great.</li>
+              <li>You can proceed to ejection of lower stages.</li>
+            </ul>
+          </section>
+          <section>
+            <figure>
+              <img src="images/conv/greg.png" alt="" />
+              <figcaption class="author">Greg</figcaption>
+            </figure>
+            <ul class="message">
+              <li>Ok Houston.</li>
+              <li>Wait... !?</li>
+              <li>Houston we have a problem....</li>
+            </ul>
+          </section>
+          <section>
+            <figure>
+              <img src="images/conv/greg.png" alt="" />
+              <figcaption class="author">Greg</figcaption>
+            </figure>
+            <ul class="message">
+              <li>We can't eject Capsule #1.</li>
+              <li>Module Isolation is not responding.</li>
+              <li>We'll investigate.</li>
+            </ul>
+          </section>
+          <section>
+            <figure>
+              <img src="images/conv/mike.png" alt="" />
+              <figcaption class="author">Mike</figcaption>
+            </figure>
+            <ul class="message">
+              <li>John, take the sliding pole,</li>
+              <li>and go to Capsule #1 to manually trigger the ejection.</li>
+            </ul>
+          </section>
+          <section>
+            <figure>
+              <img src="images/conv/me.png" alt="" />
+              <figcaption class="author">John (me)</figcaption>
+            </figure>
+            <ul class="message">
+              <li>Roger that!</li>
+            </ul>
+          </section>
+          <div class="help">
+            Press E or Enter to continue.
+          </div>
+        </div>
+      </div>
+      <div id="game">
+      </div>
+      <div id="gameover" style="display:none">
+        <h2>Game Over</h2>
+        <p id="gameover-reason"></p>
+        <p>
+          <a href="">Try Again</a>
+        </p>
+      </div>
+      </div>
+      <div id="sounds" style="display:none">
+        <audio id="s_intro" preload>
+          <source src="sounds/intro.ogg" type="audio/ogg"></source>
+        </audio>
+        <audio id="s_panic" preload>
+          <source src="sounds/panic.ogg" type="audio/ogg"></source>
+        </audio>
+      </div>
     </div>
+    <script type="text/javascript" src="vendors/q.min.js"></script>
     <script type="text/javascript" src="vendors/zepto.min.js"></script>
     <script type="text/javascript" src="vendors/underscore-min.js"></script>
     <script type="text/javascript" src="vendors/backbone-min.js"></script>

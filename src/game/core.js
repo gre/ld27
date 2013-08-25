@@ -416,6 +416,15 @@
         this.set("exit-door-activated", +new Date());
       }
     },
+    getSpriteForBadGuy: function () {
+      var button = this.entities.find(function (e) {
+        return e instanceof g.WallButton;
+      });
+      var sprite = PIXI.Sprite.fromImage("images/bad-guy.png");
+      sprite.position.x = SW*button.get("x");
+      sprite.position.y = SH*button.get("y");
+      return sprite;
+    },
     // TODO: getEntitiesByPosition
     getEntityByPosition: function (x, y) {
       return this.entities.find(function (entity) {
@@ -569,6 +578,7 @@
       document.addEventListener("keydown", _.bind(function (e) {
         var prevent = true;
         switch (e.which) {
+          case 27:
           case 13: case 69: // action
             this.trigger("action");
             break;
@@ -591,6 +601,7 @@
       }, this));
       document.addEventListener("keyup", _.bind(function (e) {
         switch (e.which) {
+          case 27:
           case 37: case 81:  case 65: // left
             this.set("left", false);
             break;

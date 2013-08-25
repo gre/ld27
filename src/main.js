@@ -1,9 +1,37 @@
 (function(g){
 
-  // TODO AssetLoadet
-
 var DEFAULT_GRAVITY = 0.001;
 var DEFAULT_SLIDE = 0.5;
+
+var $loading = $('#loading');
+
+var SOUNDS = {
+  intro: $('#s_intro')[0],
+  panic: $('#s_panic')[0]
+};
+
+var windowReady = (function(){
+  var d = Q.defer();
+  $(window).on('load', d.resolve);
+  return d.promise;
+}());
+
+var soundsReady = Q.all(_.map(SOUNDS, function (node, name) {
+  var d = Q.defer();
+  $(node).on("canplaythrough", d.resolve);
+  $(node).on("error", d.reject);
+  node.load();
+  return d.promise;
+}));
+
+var resourceReady = (function() {
+  var d = Q.defer();
+  var loader = new PIXI.AssetLoader(["assets.json"]);
+  loader.onComplete = d.resolve;
+  loader.load();
+  return d.promise;
+}());
+
 
 var render = new g.Render({
   el: document.getElementById("game"),
@@ -262,6 +290,23 @@ window.GAME = game;
 
 var player = new g.Player({});
 
+var introData = new Backbone.Model({
+  text: "",
+  date: ""
+});
+
+var introScene = new g.IntroScene({
+  model: introData,
+  width: render.width,
+  height: render.height
+});
+
+var introDialogsScene = new g.IntroDialogsScene({
+  width: render.width,
+  height: render.height
+});
+
+
 var gameScene = new g.GameScene({
   model: game,
   width: render.width,
@@ -294,6 +339,10 @@ function startFalling () {
     render.render();
   }
   loop();
+
+  var d = Q.defer();
+  fallingScene.onFinished = d.resolve;
+  return d.promise;
 }
 
 function startGame () {
@@ -345,10 +394,12 @@ function startGame () {
 
   game.on("change:level", function (model, level) {
     if (!level.get("noBadGuy")) {
-      // TODO animate of the bad guy
-      _.each(level.entities.filter(function(e){ return e instanceof g.WallButton }), function (e) {
-        e.activate();
-      });
+      var button = level.entities.find(function(e){ return e instanceof g.WallButton });
+      setTimeout(function () {
+        if (game.get("level") === level) {
+          button.activate();
+        }
+      }, 2000);
     }
     var gravity = level.get("gravity");
     var gravityIsFunction = typeof gravity === "function";
@@ -383,6 +434,18 @@ function startGame () {
     player.set({ "x": pos.x, "y": pos.y });
   });
 
+  levels.on("change:activated", function (model, activated) {
+    if (activated && model === game.get("level")) {
+      SOUNDS.panic.volume = 1;
+      SOUNDS.panic.load(); // work around to reset the time to 0
+      SOUNDS.panic.play();
+    }
+  });
+  levels.on("leave", function (model) {
+    SOUNDS.panic.pause();
+    SOUNDS.panic.volume = 0;
+  });
+
   game.on("player-exit", function () {
     game.set("level", levels.at(++currentLevel));
   });
@@ -402,26 +465,135 @@ function startGame () {
     render.render();
   }
 
+  var end = Q.defer();
+
   game.on("change:game-over", function (model, text) {
     stop = true;
-    alert("Game Over: "+text);
-    window.location.reload();
+    end.resolve(text);
   });
 
   game.set("player", player);
   game.set("level", levels.at(currentLevel));
   loop();
+
+  return end.promise;
+}
+
+function introDialogs () {
+  render.setScene(introDialogsScene);
+  $('#dialogs').show();
+  var cockpit = $("#cockpit").show();
+  cockpit.siblings().hide();
+  var convs = cockpit.children();
+  
+  var d = Q.defer();
+  var i = 0;
+
+  function next() {
+    var conv = convs.eq(i);
+    var message;
+    if (conv.size() == 0) {
+      cockpit.hide();
+      d.resolve();
+    }
+    else {
+      var messages = conv.find("ul.message li");
+      if (!conv.is(".visible")) {
+        conv.addClass("visible").siblings().removeClass("visible");
+        messages.removeClass("visible");
+      }
+      var visibles = messages.filter(".visible");
+      if (visibles.size() === messages.size()) {
+        ++ i;
+        next();
+      }
+      else {
+        message = messages.eq(visibles.size()).addClass("visible");
+        if (message.is(".auto")) {
+          setTimeout(next, 500);
+        }
+      }
+    }
+    if (conv.is(".show-cockpit")) {
+      introDialogsScene.showCockpit();
+    }
+    render.render();
+  }
+
+
+  function end() {
+    keyboard.off("action", next);
+  }
+  keyboard.on("action", next);
+
+  next();
+
+  return d.promise.then(end);
+}
+
+function intro () {
+  var delay = Q.delay(14000);
+  var d = Q.defer();
+  delay.then(d.resolve);
+  render.setScene(introScene);
+  var startTime = +new Date();
+  var lastTime = 0;
+  var stop;
+  function loop () {
+    if (stop) return;
+    var now = +new Date();
+    var time = now-startTime;
+    var delta = time-lastTime;
+
+    var cd = Math.floor(11-time/1000);
+    if (cd < 0) {
+      cd = time % 1000 > 500 ? "0" : "";
+    }
+    introData.set("text", ""+cd);
+    introData.set("date", "08/26/2047 9:20:"+Math.floor(23+time/1000)+" AM");
+
+    lastTime = time;
+    requestAnimFrame(loop);
+    render.render();
+  }
+  loop();
+  SOUNDS.intro.play();
+
+  function end() {
+    SOUNDS.intro.load();
+    stop = true;
+    keyboard.off("action", d.reject);
+  }
+  keyboard.on("action", d.reject);
+  return d.promise.then(end, end);
+}
+
+function end (text) {
+  $('#game').hide();
+  $('#gameover-reason').text(text);
+  $('#gameover').show();
 }
 
 function main () {
-  startFalling();
-  fallingScene.onFinished = function () {
-    startGame();
-  };
+  $loading.remove();
+  return intro()
+    .then(introDialogs)
+    .then(startFalling)
+    .then(startGame)
+    .then(end);
 }
 
-var loader = new PIXI.AssetLoader(["assets.json"]);
-loader.onComplete = main;
-loader.load();
+function error () {
+  $loading.addClass("error").html("Failed to load. Try again later.");
+}
+
+Q.all([ windowReady, soundsReady, resourceReady ])
+  .then(main, error)
+  .fail(function (e) {
+    console.log("error:", e);
+    console.log(e.stack);
+  })
+  .done();
+
 
 }(window._game));
