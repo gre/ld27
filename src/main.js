@@ -305,7 +305,7 @@ new g.Level({
 ]);
 
 var bossLevel = new g.Level({
-  image: "images/levels/generic.png",
+  image: "images/levels/boss.png",
   map: [
     "wwwwwwwwww",
     "w        w",
@@ -773,6 +773,10 @@ function gameover (text) {
   $('#gameover').show();
 }
 
+function error (e) {
+  $loading.addClass("error").html("Failed to load. Try again later.");
+}
+
 function main () {
   $loading.remove();
 
@@ -784,10 +788,6 @@ function main () {
     .then(bossintro)
     .then(boss)
     .then(end, gameover);
-}
-
-function error (e) {
-  $loading.addClass("error").html("Failed to load. Try again later.");
 }
 
 Q.all([ windowReady, soundsReady, resourceReady ])
