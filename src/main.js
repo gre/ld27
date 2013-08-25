@@ -26,9 +26,11 @@ var soundsReady = Q.all(_.map(SOUNDS, function (node, name) {
 
 var resourceReady = (function() {
   var d = Q.defer();
-  var loader = new PIXI.AssetLoader(["assets.json"]);
-  loader.onComplete = d.resolve;
-  loader.load();
+  $.get("assets.json", function (assets) {
+    var loader = new PIXI.AssetLoader(assets);
+    loader.on("onComplete", d.resolve);
+    loader.load();
+  });
   return d.promise;
 }());
 
