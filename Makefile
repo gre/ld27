@@ -1,0 +1,2 @@
+assets:
+	sh genassets.sh
