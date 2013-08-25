@@ -45,9 +45,9 @@ var levels = new g.Levels([
 new g.Level({
   noBadGuy: true,
   levelNumber: 1,
-  image: "images/level-1.png",
+  image: "images/levels/1.png",
   map: [
-    "Wwwwwwax#w",
+    "Wwwwgwax#w",
     "W     b= w",
     "Wppppppplw",
     "W       lw",
@@ -61,9 +61,9 @@ new g.Level({
 }),
 new g.Level({
   levelNumber: 2,
-  image: "images/level-generic.png",
+  image: "images/levels/generic.png",
   map: [
-    "Wwwwwwax#w",
+    "Wwwwgwax#w",
     "W     b| w",
     "Wppppppplw",
     "W       lw",
@@ -77,9 +77,9 @@ new g.Level({
 }),
 new g.Level({
   levelNumber: 3,
-  image: "images/level-generic.png",
+  image: "images/levels/generic.png",
   map: [
-    "Wxa#wwwwww",
+    "Wxa#gwwwww",
     "Wtb      w",
     "Wt       w",
     "Wt       w",
@@ -93,9 +93,9 @@ new g.Level({
 }),
 new g.Level({
   levelNumber: 4,
-  image: "images/level-generic.png",
+  image: "images/levels/generic.png",
   map: [
-    "Wwwwwwwax#",
+    "Wwwwgwwax#",
     "W      blw",
     "W       lw",
     "W       lw",
@@ -109,10 +109,10 @@ new g.Level({
 }),
 new g.Level({
   levelNumber: 5,
-  image: "images/level-generic.png",
+  image: "images/levels/generic.png",
   gravity: 0.002,
   map: [
-    "Wxa#wwwwww",
+    "Wxa#gwwwww",
     "Wtb     lw",
     "Wt   ppplw",
     "Wt      lw",
@@ -126,10 +126,10 @@ new g.Level({
 }),
 new g.Level({
   levelNumber: 6,
-  image: "images/level-generic.png",
+  image: "images/levels/generic.png",
   gravity: 0.0001,
   map: [
-    "Wwwwwwwax#",
+    "Wwwwgwwax#",
     "W      b w",
     "W        w",
     "W        w",
@@ -143,12 +143,31 @@ new g.Level({
 }),
 new g.Level({
   levelNumber: 7,
-  image: "images/level-generic.png",
+  image: "images/levels/generic.png",
+  gravity: function (time) {
+    return 0.001*Math.sin(0.002*time);
+  },
+  map: [
+    "Wwwwgwwax#",
+    "W      b w",
+    "W        w",
+    "W        w",
+    "W        w",
+    "W        w",
+    "W        w",
+    "W        w",
+    "Wo       w",
+    "W-wwwwwwww"
+  ]
+}),
+new g.Level({
+  levelNumber: 8,
+  image: "images/levels/generic.png",
   gravity: function (time) {
     return 0.0005+0.0008*g.smoothstep(-1, 1, Math.cos(0.001*time));
   },
   map: [
-    "Wxa#wwwwww",
+    "Wxa#wgwwww",
     "Wtb      w",
     "Wt       w",
     "Wt       w",
@@ -161,17 +180,17 @@ new g.Level({
   ]
 }),
 new g.Level({
-  levelNumber: 8,
-  image: "images/level-generic.png",
+  levelNumber: 9,
+  image: "images/levels/generic.png",
   gravity: function (time) {
     return 0.001*Math.cos(0.005*time);
   },
   map: [
-    "Wwwwwwwax#",
-    "W     pb w",
-    "W lp  p  w",
-    "W lp     w",
-    "W lppppppw",
+    "Wwwwgwwax#",
+    "W      b w",
+    "W        w",
+    "W  ppppppw",
+    "W        w",
     "W        w",
     "Wppppppp w",
     "W        w",
@@ -180,13 +199,13 @@ new g.Level({
   ]
 }),
 new g.Level({
-  levelNumber: 9,
-  image: "images/level-generic.png",
+  levelNumber: 10,
+  image: "images/levels/generic.png",
   gravity: function (time) {
     return 0.0008+0.001*Math.cos(0.002*time);
   },
   map: [
-    "Wxa#wwwwww",
+    "Wxa#wgwwww",
     "Wtb      w",
     "Wt       w",
     "Wt       w",
@@ -199,8 +218,8 @@ new g.Level({
   ]
 }), 
 new g.Level({
-  levelNumber: 10,
-  image: "images/level-generic.png",
+  levelNumber: 11,
+  image: "images/levels/generic.png",
   playerSlide: 0.96,
   map: [
     "Wwwwwwwax#",
@@ -216,10 +235,10 @@ new g.Level({
   ]
 }),
 new g.Level({
-  levelNumber: 11,
-  image: "images/level-generic.png",
+  levelNumber: 12,
+  image: "images/levels/11.png",
   map: [
-    "Wxa#wwwwww",
+    "Wxa#wgwwww",
     "W b      w",
     "W        w",
     "W        w",
@@ -232,27 +251,27 @@ new g.Level({
   ]
 }),
 new g.Level({
-  levelNumber: 12,
-  image: "images/level-generic.png",
+  levelNumber: 13,
+  image: "images/levels/generic.png",
   playerSlide: 0.96,
   map: [
-    "Wwwwwwwax#",
+    "Wwwwgwwax#",
     "W    Gpb w",
     "W   p    w",
     "W   p    w",
     "W        w",
     "W  G     w",
     "Wtppp    w",
-    "Wt    P  w",
-    "Wto   PPGw",
+    "Wt       w",
+    "Wto  PPPGw",
     "Ww-wwwwwww"
   ]
 }),
 new g.Level({
-  levelNumber: 13,
-  image: "images/level-generic.png",
+  levelNumber: 14,
+  image: "images/levels/generic.png",
   map: [
-    "Wxa#wwwwww",
+    "Wxa#wgwwww",
     "W pG     w",
     "W b  ppppw",
     "Wppp     w",
@@ -266,10 +285,10 @@ new g.Level({
 }),
 
 new g.Level({
-  levelNumber: 14,
-  image: "images/level-generic.png",
+  levelNumber: 15,
+  image: "images/levels/generic.png",
   map: [
-    "Wwwwwwwax#",
+    "Wwwwgwwax#",
     "W  Gp  b w",
     "W   p    w",
     "W   p    w",
@@ -283,9 +302,26 @@ new g.Level({
 }),
 ]);
 
+var bossLevel = new g.Level({
+  image: "images/levels/generic.png",
+  map: [
+    "wwwwwwwwww",
+    "w        w",
+    "w        w",
+    "w        w",
+    "w        w",
+    "w        w",
+    "w        w",
+    "w        w",
+    "w o      w",
+    "ww-wwwwwww"
+  ]
+});
+
 var keyboard = new g.Keyboard({});
  
 var game = new g.Game({});
+var bossGame = new g.BossGame({});
 window.GAME = game;
 
 var player = new g.Player({});
@@ -306,9 +342,14 @@ var introDialogsScene = new g.IntroDialogsScene({
   height: render.height
 });
 
-
 var gameScene = new g.GameScene({
   model: game,
+  width: render.width,
+  height: render.height
+});
+
+var bossScene = new g.BossScene({
+  model: bossGame,
   width: render.width,
   height: render.height
 });
@@ -346,6 +387,8 @@ function startFalling () {
 }
 
 function startGame () {
+  var end = Q.defer();
+
   keyboard.on("change:left change:right", function () {
     var left = this.get("left");
     var right = this.get("right");
@@ -392,14 +435,31 @@ function startGame () {
     }
   });
 
+  var badGuyHasTalked = false;
+
   game.on("change:level", function (model, level) {
     if (!level.get("noBadGuy")) {
       var button = level.entities.find(function(e){ return e instanceof g.WallButton });
-      setTimeout(function () {
-        if (game.get("level") === level) {
-          button.activate();
-        }
-      }, 2000);
+      function badGuyAction (dontBlock) {
+        !dontBlock && player.set("playerIsBlocked", true);
+        return Q.delay(1000).then(function () {
+          !dontBlock && player.set("playerIsBlocked", false);
+          if (game.get("level") === level) {
+            button.activate();
+          }
+        });
+      }
+      if (badGuyHasTalked) {
+        badGuyAction(true);
+      }
+      else {
+        player.set("playerIsBlocked", true);
+        conversation("badguy1").then(function () {
+          $("#dialogs, #badguy1").hide();
+          badGuyAction();
+          badGuyHasTalked = true;
+        });
+      }
     }
     var gravity = level.get("gravity");
     var gravityIsFunction = typeof gravity === "function";
@@ -447,7 +507,9 @@ function startGame () {
   });
 
   game.on("player-exit", function () {
-    game.set("level", levels.at(++currentLevel));
+    var level = levels.at(++currentLevel);
+    if (!level) end.resolve();
+    else game.set("level", level);
   });
 
   render.setScene(gameScene);
@@ -465,26 +527,26 @@ function startGame () {
     render.render();
   }
 
-  var end = Q.defer();
-
   game.on("change:game-over", function (model, text) {
-    stop = true;
-    end.resolve(text);
+    end.reject(text);
   });
 
   game.set("player", player);
   game.set("level", levels.at(currentLevel));
   loop();
 
+  end.promise.fin(function () {
+    stop = true;
+  });
+
   return end.promise;
 }
 
-function introDialogs () {
-  render.setScene(introDialogsScene);
+function conversation (id, onNext) {
   $('#dialogs').show();
-  var cockpit = $("#cockpit").show();
-  cockpit.siblings().hide();
-  var convs = cockpit.children();
+  var group = $("#"+id).show();
+  group.siblings().hide();
+  var convs = group.children();
   
   var d = Q.defer();
   var i = 0;
@@ -493,7 +555,7 @@ function introDialogs () {
     var conv = convs.eq(i);
     var message;
     if (conv.size() == 0) {
-      cockpit.hide();
+      group.hide();
       d.resolve();
     }
     else {
@@ -510,14 +572,11 @@ function introDialogs () {
       else {
         message = messages.eq(visibles.size()).addClass("visible");
         if (message.is(".auto")) {
-          setTimeout(next, 500);
+          setTimeout(next, 800);
         }
       }
     }
-    if (conv.is(".show-cockpit")) {
-      introDialogsScene.showCockpit();
-    }
-    render.render();
+    onNext && onNext(conv, message);
   }
 
 
@@ -529,6 +588,17 @@ function introDialogs () {
   next();
 
   return d.promise.then(end);
+}
+
+function introDialogs () {
+  render.setScene(introDialogsScene);
+
+  return conversation("cockpit", function (conv, message) {
+    if (conv.is(".show-cockpit")) {
+      introDialogsScene.showCockpit();
+    }
+    render.render();
+  });
 }
 
 function intro () {
@@ -568,7 +638,134 @@ function intro () {
   return d.promise.then(end, end);
 }
 
-function end (text) {
+function bossintro () {
+  return conversation("badguy2");
+}
+
+function boss () {
+  var end = Q.defer();
+
+  var badGuy = new g.BadGuy({
+    x: 4.5,
+    y: 1
+  });
+
+  keyboard.on("change:left change:right", function () {
+    var left = this.get("left");
+    var right = this.get("right");
+    var dx = (function(){
+      if (left && !right) return -1;
+      if (right && !left) return 1;
+      return 0;
+    }());
+    player.set("dx", dx);
+  });
+  keyboard.on("action", function () {
+  });
+
+  render.setScene(bossScene);
+  var startTime = +new Date();
+  var lastTime = 0;
+  var stop;
+  function loop () {
+    if (stop) return;
+    var now = +new Date();
+    var time = now-startTime;
+    var delta = time-lastTime;
+    lastTime = time;
+    requestAnimFrame(loop);
+    bossGame.update(time, Math.min(delta, 1000/30), bossGame);
+    render.render();
+  }
+
+  var speed = 0.05;
+  var triggerEvery = 2000;
+  function triggerLoop () {
+    if (stop) return;
+    setTimeout(triggerLoop, triggerEvery);
+    bossGame.triggerBall(0.25+Math.PI*(0.5*Math.random()), speed);
+    speed = Math.min(0.2, speed*1.01);
+    triggerEvery = Math.max(100, triggerEvery*0.99);
+  }
+
+  player.on("change:life", function (m, life) {
+    if (life==0)
+      bossGame.set("game-over", "You're dead.");
+  });
+
+  badGuy.on("change:life", function (m, life) {
+    if (life==0)
+      end.resolve();
+    else {
+      triggerEvery = life*100;
+    }
+  });
+
+  var pos = bossLevel.get("playerPosition");
+  player.set({ "x": pos.x, "y": pos.y });
+
+  badGuy.set("life", 10);
+  player.set("life", 3);
+
+  bossLevel.entities.add(badGuy);
+
+  bossGame.set("gravity", DEFAULT_GRAVITY);
+  bossGame.set("player", player);
+  bossGame.set("badGuy", badGuy);
+  bossGame.set("level", bossLevel);
+
+  bossGame.balls.on("hit-badguy", function (ball, dx, dy) {
+    badGuy.set("life", badGuy.get("life")-1);
+    bossGame.balls.remove(ball);
+  });
+
+  bossGame.balls.on("hit-player", function (ball, dx, dy) {
+    if (player.get("protection")) {
+      var vx = ball.get("vx");
+      var vy = ball.get("vy");
+      if (vy>0) {
+        ball.set({
+          "vy": -vy,
+          "vx": ball.get("vx") + 0.1*dx
+        });
+      }
+    }
+    else {
+      bossGame.balls.remove(ball);
+      player.set("life", player.get("life")-1);
+    }
+  });
+
+  bossScene.initLevel();
+
+  setInterval(function () {
+    player.set("protection", !player.get("protection"));
+  }, 5000);
+
+  triggerLoop();
+
+  bossGame.on("change:game-over", function (model, text) {
+    end.reject(text);
+  });
+
+  loop();
+
+  end.promise.fin(function () {
+    stop = true;
+  });
+
+  return end.promise;
+}
+
+function end () {
+  $('#game').hide();
+  $('#gameend').show();
+}
+
+function gameover (text) {
+  if (text.stack) {
+    console.log(text.stack);
+  }
   $('#game').hide();
   $('#gameover-reason').text(text);
   $('#gameover').show();
@@ -576,24 +773,26 @@ function end (text) {
 
 function main () {
   $loading.remove();
-  return intro()
+
+  return Q()
+    .then(intro)
     .then(introDialogs)
     .then(startFalling)
     .then(startGame)
-    .then(end);
+    .then(bossintro)
+    .then(boss)
+    .then(end, gameover);
 }
 
-function error () {
+function error (e) {
   $loading.addClass("error").html("Failed to load. Try again later.");
 }
 
 Q.all([ windowReady, soundsReady, resourceReady ])
   .then(main, error)
-  .fail(function (e) {
-    console.log("error:", e);
-    console.log(e.stack);
-  })
-  .done();
+  .done(function (e) {
+    console.log("game end.");
+  });
 
 
 }(window._game));

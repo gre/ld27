@@ -28,7 +28,7 @@ ul, li {
   position: relative;
 }
 
-#dialogs, #game, #gameover {
+#dialogs, #game, #gameover, #gameend {
   position: absolute;
   top: 0;
   left: 0;
@@ -65,18 +65,22 @@ ul, li {
   margin: 0;
   padding: 0;
   margin-right: 10px;
+  position: relative;
 }
 #dialogs figure img {
   width: 100%;
 }
 #dialogs figcaption {
-  margin-top: 5px;
   font-weight: bold;
   font-size: 0.9em;
-  text-align: right;
+  background: black;
+  padding: 5px 0 0 5px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 #dialogs .message {
-  font-size: 0.8em;
+  font-size: 0.6em;
 }
 #dialogs .message li {
   opacity: 0.2;

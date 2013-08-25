@@ -22,10 +22,54 @@
 
 
   g.Player = g.Entity.extend({
+
+    setSprite: function (sprite) {
+      this.sprite && this.spriteContainer.removeChild(this.sprite);
+      this.spriteContainer.addChild(sprite);
+      this.sprite = sprite;
+    },
+    getSprite: function () {
+      return this.spriteContainer;
+    },
+
     initialize: function () {
-      this.sprite = PIXI.Sprite.fromImage("images/player.png");
+      this.spriteContainer = new PIXI.DisplayObjectContainer();
+      this.protection = new PIXI.Graphics();
+      this.protection.beginFill(0, 1);
+      this.protection.drawRect(-SW/4, -5, SW, 5);
+      this.protection.endFill();
+
+      this.set("protection", false);
+      this.on("change:protection", function (m, on) {
+        if (on) this.spriteContainer.addChild(this.protection);
+        else this.spriteContainer.removeChild(this.protection);
+      }, this);
+
+      function reverseX (sprite) {
+        sprite.pivot.x = SW/2;
+        sprite.scale.x = -1;
+        return sprite;
+      }
+
+      this.jumpRight = PIXI.Sprite.fromImage("images/player/jump.png");
+      this.walkRight = PIXI.Sprite.fromImage("images/player/walk.png");
+      this.stopRight = PIXI.Sprite.fromImage("images/player/stop.png");
+      this.jumpLeft = reverseX(PIXI.Sprite.fromImage("images/player/jump.png"));
+      this.walkLeft = reverseX(PIXI.Sprite.fromImage("images/player/walk.png"));
+      this.stopLeft = reverseX(PIXI.Sprite.fromImage("images/player/stop.png"));
+
+      this.climb1 = PIXI.Sprite.fromImage("images/player/climb1.png");
+      this.climb2 = PIXI.Sprite.fromImage("images/player/climb2.png");
+      this.climb1Right = PIXI.Sprite.fromImage("images/player/climb1-right.png");
+      this.climb2Right = PIXI.Sprite.fromImage("images/player/climb2-right.png");
+      this.climb1Left = reverseX(PIXI.Sprite.fromImage("images/player/climb1-right.png"));
+      this.climb2Left = reverseX(PIXI.Sprite.fromImage("images/player/climb2-right.png"));
+
+      this.setSprite(this.stopRight);
+
       this.syncPosition();
 
+      this.set("blocked", false);
       this.set("w", 0.5);
       this.set("h", 1);
       this.set("speedx", 0.007);
@@ -34,21 +78,22 @@
       this.set("accy", 0);
       this.set("dx", 0);
       this.set("dy", 0);
+      this.set("slide", 0.1);
       this.set("flyRatio", 0.5);
       this.on("change:x change:y", this.syncPosition, this);
     },
     blockPlayer: function () {
       return false;
     },
+
     syncPosition: function () {
-      this.sprite.position.x = SW*this.get("x");
-      this.sprite.position.y = SH*this.get("y");
-    },
-    getSprite: function () {
-      return this.sprite;
+      this.spriteContainer.position.x = SW*this.get("x");
+      this.spriteContainer.position.y = SH*this.get("y");
     },
     canJump: function () {
-      return this.get("floor") && !this.get("ladder");
+      return !this.get("playerIsBlocked") && 
+        this.get("floor") && 
+        !this.get("ladder");
     },
     update: function (time, delta, game) {
       var flyRatio = this.get("flyRatio");
@@ -61,23 +106,28 @@
       var gravity = onLadder ? 0 : game.get("gravity");
       var accx = this.get("accx");
       var accy = this.get("accy") + gravity*delta;
+
+      if (this.get("dx")) this.lastDX = this.get("dx");
       
       var dx = 0, dy = 0;
 
       dx += accx;
-      if (onFloor||onLadder) {
-        dx += this.get("dx")*speedx*delta;
-      }
-      else {
-        dx += this.get("dx")*speedx*delta*flyRatio;
-      }
-
       dy += accy;
-      if (onLadder) {
-        dy += this.get("dy")*speedy*delta;
-      }
-      else if (!onFloor) {
-        dy += Math.max(0, this.get("dy")*speedy*delta*flyRatio);
+
+      
+      if (!this.get("playerIsBlocked")) {
+        if (onFloor||onLadder) {
+          dx += this.get("dx")*speedx*delta;
+        }
+        else {
+          dx += this.get("dx")*speedx*delta*flyRatio;
+        }
+        if (onLadder) {
+          dy += this.get("dy")*speedy*delta;
+        }
+        else if (!onFloor) {
+          dy += Math.max(0, this.get("dy")*speedy*delta*flyRatio);
+        }
       }
 
       var constraints = game.movePlayer(this, dx, dy);
@@ -103,6 +153,33 @@
       }
       else {
         this.set("accy", accy);
+      }
+
+      var right = this.lastDX > 0;
+      var even = (dx&&this.get("dx")||this.get("dy")) && (time % 400) < 200;
+
+      if (onLadder) {
+        var isLadder = onLadder instanceof g.Ladder;
+        if (!isLadder) {
+          this.setSprite(even ? this.climb1 : this.climb2);
+        }
+        else if (onLadder.get("reverse")) {
+          this.setSprite(even ? this.climb1Left : this.climb2Left);
+        }
+        else {
+          this.setSprite(even ? this.climb1Right : this.climb2Right);
+        }
+      }
+      else if (onFloor) {
+        if (right) {
+          this.setSprite(even ? this.walkRight : this.stopRight);
+        }
+        else {
+          this.setSprite(even ? this.walkLeft : this.stopLeft);
+        }
+      }
+      else {
+        this.setSprite(right ? this.jumpRight : this.jumpLeft);
       }
     }
   });
@@ -212,42 +289,6 @@
     }
   });
   
-  g.MovingPlatform = g.Entity.extend({
-    initialize: function () {
-      var sprite = PIXI.Sprite.fromImage("images/moving-platform.png");
-      sprite.position.x = SW*this.get("x");
-      sprite.position.y = SH*this.get("y");
-      this.sprite = sprite;
-      this.on("change:y", function (model, y) {
-        sprite.position.y = SW*y;
-      });      
-      this.on("change:x", function (model, x) {
-        sprite.position.x = SW*x;
-      });
-      this.set("v", this.get("speed"));
-    },
-    getSprite: function () {
-      return this.sprite;
-    },
-    update: function (time, delta, game) {
-      if (this.get("horizontal")) {
-        var x = this.get("x");
-        var from = this.get("from");
-        var to = this.get("to");
-        var speed = this.get("speed");
-        if (x < from) {
-          x = from;
-          this.set("v", speed);
-        }
-        else if (x > to) {
-          x = to;
-          this.set("v", -speed);
-        }
-        this.set("x", x + this.get("v")*delta);
-      }
-    }
-  });
-
   g.Ladder = g.Entity.extend({
     getSprite: function () {
       var sprite = PIXI.Sprite.fromImage("images/ladder.png");
@@ -319,6 +360,46 @@
     }
   });
 
+  g.WallWithGravityIndicator = g.Entity.extend({
+    getSprite: function () {
+      var container = new PIXI.DisplayObjectContainer();
+      container.position.x = SW*this.get("x");
+      container.position.y = SH*this.get("y");
+      var img = PIXI.Sprite.fromImage("images/wall.png");
+      this.graphics = new PIXI.Graphics();
+      container.addChild(img);
+      container.addChild(this.graphics);
+      return container;
+    },
+    update: function (time, delta, game) {
+      var gravity = game.get("gravity");
+      var c = this.graphics;
+      c.clear();
+      var bg = 0x000000;
+      var max = 6;
+      var half = 3;
+      var v = Math.abs(gravity/0.001);
+      for (var i=0; i<max; ++i) {
+        var sup = i >= half;
+        var color = sup ? 0xff0000 : 0x00ff00;
+        var on = gravity<0 && i >= half && i-half <= v ||
+                gravity>0 && i < half && half-i-1 <= v;
+        c.beginFill(on ? color : bg, 1);
+        c.drawRect(8, 6+3*i, SW-16, 2);
+        c.endFill();
+      }
+    }
+  });
+
+  g.BadGuy = g.Entity.extend({
+    getSprite: function () {
+      var sprite = PIXI.Sprite.fromImage("images/bad-guy.png");
+      sprite.position.x = SW*this.get("x");
+      sprite.position.y = SH*this.get("y");
+      return sprite;
+    }
+  });
+
   g.WallWithAlarm = g.Entity.extend({
     initialize: function () {
       var container = new PIXI.DisplayObjectContainer();
@@ -366,13 +447,10 @@
             case "a": return new g.WallWithAlarm({ x: x, y: y, level: this });
             case "b": return new g.WallButton({ x: x, y: y });
             case "w": return new g.Wall({ x: x, y: y });
+            case "g": return new g.WallWithGravityIndicator({ x: x, y: y });
             case "W": return new g.WallWithPole({ x: x, y: y });
             case "#": return new g.WallLevelNumber({ x: x, y: y, number: this.get("levelNumber") });
             case "-": return new g.ClosingDoor({ x: x, y: y });
-            case "_":
-              var from = _.indexOf(line, ">");
-              var to = _.indexOf(line, "<");
-              return new g.MovingPlatform({ x: x, y: y, horizontal: true, from: from, to: to, speed: 0.002 });
             case "x": return new g.ExitDoor({ x: x, y: y, level: this });
             case "=": return new g.ExitLadder({ x: x, y: y });
             case "G": return new g.SwitchButton({ x: x, y: y, typ: "gravity" });
@@ -566,6 +644,100 @@
         xblock: blockx,
         yblock: blocky
       };
+    }
+  });
+
+  g.Ball = Backbone.Model.extend({
+    initialize: function () {
+      this.sprite = new PIXI.Graphics();
+      this.sprite.beginFill(0, 1);
+      this.sprite.drawCircle(0, 0, 5);
+      this.sprite.endFill();
+      this.on("change:x change:y", this.syncPosition);
+      this.syncPosition();
+    },
+    syncPosition: function () {
+      this.sprite.position.x = SW*this.get("x");
+      this.sprite.position.y = SH*this.get("y");
+    },
+    update: function (time, delta, game) {
+      var x = this.get("x");
+      var y = this.get("y");
+
+      var maxx = 9, minx = 1;
+
+      x += this.get("vx");
+      y += this.get("vy");
+
+      if (x > maxx) {
+        this.set("vx", -this.get("vx"));
+        x = maxx;
+      }
+      if (x < minx) {
+        this.set("vx", -this.get("vx"));
+        x = minx;
+      }
+
+      this.set({
+        x: x,
+        y: y
+      });
+    }
+  });
+
+  g.Balls = Backbone.Collection.extend({
+    model: g.Ball
+  });
+
+  g.BossGame = g.Game.extend({
+    initialize: function () {
+      g.Game.prototype.initialize.apply(this, arguments);
+      this.balls = new g.Balls();
+      this.balls.on("add", function (ball) {
+        this.updates.add(ball);
+      }, this);
+      this.balls.on("remove", function (ball) {
+        this.updates.remove(ball);
+      }, this);
+    },
+    triggerBall: function (angle, force) {
+      var dx = force*Math.cos(angle);
+      var dy = force*Math.sin(angle);
+      var ball = new g.Ball({
+        x: 5,
+        y: 2,
+        vx: dx,
+        vy: dy
+      });
+      this.balls.add(ball);
+    },
+    update: function () {
+      g.Game.prototype.update.apply(this, arguments);
+      var player = this.get("player");
+      var badGuy = this.get("badGuy");
+      this.balls.each(function (ball) {
+        if (ball.get("y") > 9) {
+          this.balls.remove(ball);
+        }
+        else {
+          var px = ball.get("x") - player.get("x") - 0.25;
+          var py = ball.get("y") - player.get("y");
+          var w = player.get("protection") ? 0.5 : 0.25;
+          if (player.get("protection")) {
+            py += 0.2;
+          }
+          if (Math.abs(px) < w && 0<py && py<1) {
+            ball.trigger("hit-player", ball, px, py);
+            return;
+          }
+          var gx = ball.get("x") - badGuy.get("x");
+          var gy = ball.get("y") - badGuy.get("y");
+          if (0<gx && gx<1 && 0<gy && gy<1) {
+            ball.trigger("hit-badguy", ball, gx, gy);
+            return;
+          }
+        }
+      }, this);
     }
   });
 

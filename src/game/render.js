@@ -243,6 +243,31 @@
     }
   });
 
+  g.BossScene = Backbone.View.extend({
+    initialize: function (opts) {
+      this.width = opts.width;
+      this.height = opts.height;
+      this.stage = new PIXI.Stage(0x000000);
+    },
+    initLevel: function () {
+      this.level = new g.LevelRender({
+        model: this.model.get("level"),
+        player: this.model.get("player"),
+        width: this.width,
+        height: this.height
+      });
+      this.model.balls.on("add", function (ball) {
+        this.stage.addChild(ball.sprite);
+      }, this);
+      this.model.balls.on("remove", function (ball) {
+        this.stage.removeChild(ball.sprite);
+      }, this);
+      this.stage.addChild(this.level.display);
+    },
+    render: function (renderer) {
+      renderer.render(this.stage);
+    }
+  });
 
 
 }(window._game));
