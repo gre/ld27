@@ -47,22 +47,12 @@
     }
   });
 
-  g.GameRender = Backbone.View.extend({
+  g.GameScene = Backbone.View.extend({
     initialize: function (opts) {
-      this.el.innerHTML = "";
       this.width = opts.width;
       this.height = opts.height;
       this.levelTransitionDuration = opts.levelTransitionDuration || 500;
-      this.renderer = PIXI.autoDetectRenderer(this.width, this.height);
-      this.el.appendChild(this.renderer.view);
       this.listenTo(this.model, "change:level", this.onLevelChange);
-      //this.initialStage();
-      this.gameStage();
-    },
-    initialStage: function () {
-      this.stage = new PIXI.Stage(0xFF00FF);
-    },
-    gameStage: function () {
       this.stage = new PIXI.Stage(0x000000);
     },
     onLevelChange: function () {
@@ -79,7 +69,7 @@
       });
       this.stage.addChild(this.level.display);
     },
-    render: function () {
+    render: function (renderer) {
       var levelTransitionDuration = this.levelTransitionDuration;
       
       if (this.oldLevel) {
@@ -95,8 +85,27 @@
       }
       
       this.level.render();
-      this.renderer.render(this.stage);
+      renderer.render(this.stage);
     }
   });
+
+  g.Render = Backbone.View.extend({
+    initialize: function (opts) {
+      this.el.innerHTML = "";
+      this.width = opts.width;
+      this.height = opts.height;
+      this.levelTransitionDuration = opts.levelTransitionDuration || 500;
+      this.renderer = PIXI.autoDetectRenderer(this.width, this.height);
+      this.el.appendChild(this.renderer.view);
+    },
+    setScene: function (scene) {
+      this.scene = scene;
+    },
+    render: function () {
+      this.scene && this.scene.render(this.renderer);
+    }
+  });
+
+
 
 }(window._game));

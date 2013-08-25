@@ -5,6 +5,12 @@ var stop;
 var DEFAULT_GRAVITY = 0.001;
 var DEFAULT_SLIDE = 0.5;
 
+var render = new g.Render({
+  el: document.getElementById("game"),
+  width: 320,
+  height: 320
+});
+
 var currentLevel = 0;
 
 var levels = new g.Levels([
@@ -332,33 +338,39 @@ game.on("player-exit", function () {
   game.set("level", levels.at(++currentLevel));
 });
 
+var gameScene = new g.GameScene({
+  model: game,
+  width: render.width,
+  height: render.height
+});
+
+function startGame () {
+  var startTime = +new Date();
+  var lastTime = 0;
+  function loop () {
+    if (stop) return;
+    var now = +new Date();
+    var time = now-startTime;
+    var delta = time-lastTime;
+    lastTime = time;
+    requestAnimFrame(loop);
+    game.update(time, Math.min(delta, 1000/30), game);
+    render.render();
+  }
+
+  game.set("player", player);
+  game.set("level", levels.at(currentLevel));
+  loop();
+}
+
+render.setScene(gameScene);
+
 game.on("change:game-over", function (model, text) {
   stop = true;
   alert("Game Over: "+text);
+  window.location.reload();
 });
 
-var render = new g.GameRender({
-  model: game,
-  el: document.getElementById("game"),
-  width: 400,
-  height: 320
-});
-
-var startTime = +new Date();
-var lastTime = 0;
-function loop () {
-  if (stop) return;
-  var now = +new Date();
-  var time = now-startTime;
-  var delta = time-lastTime;
-  lastTime = time;
-  requestAnimFrame(loop);
-  game.update(time, Math.min(delta, 1000/30), game);
-  render.render();
-}
-
-game.set("player", player);
-game.set("level", levels.at(currentLevel));
-loop();
+startGame();
 
 }(window._game));
