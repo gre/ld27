@@ -300,6 +300,15 @@
       return container;
     }
   });
+  
+  g.WallWithPole = g.Entity.extend({
+    getSprite: function () {
+      var sprite = PIXI.Sprite.fromImage("images/wall-pole.png");
+      sprite.position.x = SW*this.get("x");
+      sprite.position.y = SH*this.get("y");
+      return sprite;
+    }
+  });
 
   g.Wall = g.Entity.extend({
     getSprite: function () {
@@ -357,6 +366,7 @@
             case "a": return new g.WallWithAlarm({ x: x, y: y, level: this });
             case "b": return new g.WallButton({ x: x, y: y });
             case "w": return new g.Wall({ x: x, y: y });
+            case "W": return new g.WallWithPole({ x: x, y: y });
             case "#": return new g.WallLevelNumber({ x: x, y: y, number: this.get("levelNumber") });
             case "-": return new g.ClosingDoor({ x: x, y: y });
             case "_":

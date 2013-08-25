@@ -17,7 +17,7 @@
       _.each(tiles, tilesContainer.addChild, tilesContainer);
 
       var player = opts.player;
-      var playerTile = player.getSprite();
+      var playerTile = player && player.getSprite();
 
       var redOverlay = new PIXI.Graphics();
       redOverlay.alpha = 0;
@@ -30,9 +30,16 @@
       levelBackground.drawRect(0, 0, levelwidth, levelheight);
       levelBackground.endFill();
 
+      var imgsrc = level.get("image") || "images/level-generic.png";
+      var levelImage;
+      if (imgsrc) {
+        levelImage = PIXI.Sprite.fromImage(imgsrc);
+      }
+
       levelContainer.addChild(levelBackground);
+      levelImage && levelContainer.addChild(levelImage);
       levelContainer.addChild(tilesContainer);
-      levelContainer.addChild(playerTile);
+      playerTile && levelContainer.addChild(playerTile);
       levelContainer.addChild(redOverlay);
 
       this.redOverlay = redOverlay;
@@ -46,6 +53,64 @@
       this.display.position.y = y;
     }
   });
+
+  g.LevelsFalling = Backbone.View.extend({
+    initialize: function (opts) {
+      this.width = opts.width;
+      this.height = opts.height;
+      this.player = opts.player;
+      this.levels = opts.levels;
+      this.levelTransitionDuration = opts.levelTransitionDuration || 300;
+      this.onFinished = opts.onFinished;
+      this.stage = new PIXI.Stage(0x000000);
+    },
+    setLevel: function (i) {
+      this.currentI = i;
+      var level = this.levels.at(i);
+      var oldLevel = this.level;
+      if (oldLevel) {
+        this.oldLevelTime = +new Date();
+        this.oldLevel = oldLevel;
+      }
+      this.level = new g.LevelRender({
+        model: level,
+        width: this.width,
+        height: this.height
+      });
+      this.stage.addChild(this.level.display);
+      var playerTile = this.player.getSprite();
+      this.stage.addChild(playerTile);
+    },
+    update: function (time) {
+      var i = this.levels.size() - 1 - Math.floor(time/this.levelTransitionDuration);
+      if (i !== this.currentI) {
+        if (i < 0) {
+          this.stopped = true;
+          this.onFinished && this.onFinished();
+        }
+        else {
+          this.setLevel(i);
+        }
+      }
+    },
+    render: function (renderer) {
+      var levelTransitionDuration = this.levelTransitionDuration;
+      
+      if (this.oldLevel) {
+        var t = g.smoothstep(0, levelTransitionDuration, +new Date()-this.oldLevelTime);
+        this.oldLevel.render();
+        this.oldLevel.setY(-this.height*t);
+        this.level.setY(this.height*(1-t));
+        if (t == 1) {
+          this.stage.removeChild(this.oldLevel.display);
+          this.oldLevel.remove();
+          this.oldLevel = null;
+        }
+      }
+      this.level && this.level.render();
+      renderer.render(this.stage);
+    }
+  });  
 
   g.GameScene = Backbone.View.extend({
     initialize: function (opts) {
