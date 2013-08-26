@@ -11,11 +11,11 @@ Tech notes
 
 It was my first time making a platform game & my first time with Pixi.js.
 
-*Lib used: *Pixi.js, Q, Backbone+Underscore, Zepto*
-*Software used: *VIM, Gimp, SunVox*
+- Lib used: *Pixi.js, Q, Backbone+Underscore, Zepto*
+- Software used: *VIM, Gimp, SunVox*
 
 Credits
 ------
 
-http://svenniemannie.deviantart.com/art/Spaceship-Texture-91959740
-http://www.nasa.gov/connect/sounds/index.html
+- http://svenniemannie.deviantart.com/art/Spaceship-Texture-91959740
+- http://www.nasa.gov/connect/sounds/index.html
