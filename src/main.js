@@ -10,6 +10,14 @@ var SOUNDS = {
   panic: $('#s_panic')[0]
 };
 
+var queryStringParams = (function (queryString) {
+  return _.reduce(queryString.substring(1).split("&"), function (obj, param) {
+    var parts = param.split("=");
+    obj[parts[0]] = parts[1];
+    return obj;
+  }, {});
+}(location.search));
+
 var windowReady = (function(){
   var d = Q.defer();
   $(window).on('load', d.resolve);
@@ -769,6 +777,7 @@ function gameover (text) {
     console.log(text.stack);
   }
   $('#game').hide();
+  $('#dialogs').hide();
   $('#gameover-reason').text(text);
   $('#gameover').show();
 }
@@ -779,11 +788,11 @@ function error (e) {
 
 function main () {
   $loading.remove();
-
-  return Q()
-    .then(intro)
-    .then(introDialogs)
-    .then(startFalling)
+  var p = Q();
+  if (!queryStringParams.skipintro) {
+    p = p.then(intro).then(introDialogs).then(startFalling);
+  }
+  return p
     .then(startGame)
     .then(bossintro)
     .then(boss)
